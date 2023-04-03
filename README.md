@@ -10,4 +10,4 @@ Se necesita integracion con la aplicacion de gestion de almacén correspondiente
 
 TODO:
 
-- es solo un inicio, de momento solo tiene el escaneo de codigo de barra para los produnctos
+- es solo un inicio, de momento solo tiene el escaneo de codigo de barra para los productos
