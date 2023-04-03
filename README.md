@@ -1,16 +1,13 @@
-# my_chat_friend
+# my_warehouse_orders
 
-A Chat with IA using prompt enginiering in Flutter (tested on Android).
+Warehouse Management.
 
 ## Getting Started
 
-Es una prueba de concepto minimalista para ejectitar el "Prompt Enginiering" de chat-gpt3.5-turbo.
+Es una prueba de concepto gestion de una almacen, ordenes de entrada, salida y control de inventario.
 
-Se necesita configurar una api key de openAI.
-
-Si de hace un long press en un mensaje lo envia al servicio de TTS y un doble click al broc de notas.
+Se necesita integracion con la aplicacion de gestion de almacén correspondiente.
 
 TODO:
 
-- al entrar en la pantalla de gonfiguración la primera vez da un error y no carga buen por que el fichero no esta creado. Darle al boton guardar y salir de la pantalla y vonver a entrar.
-- ???.
+- es solo un inicio, de momento solo tiene el escaneo de codigo de barra para los produnctos
