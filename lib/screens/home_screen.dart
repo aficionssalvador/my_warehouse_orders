@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_chat_friend/providers/general.dart';
+import '/providers/general.dart';
 
 class MyHomePage extends StatelessWidget {
   @override

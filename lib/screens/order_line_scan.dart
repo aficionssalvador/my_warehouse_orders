@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:my_chat_friend/providers/general.dart';
+import '/providers/general.dart';
 
 
 class ScannerScreen extends StatefulWidget {

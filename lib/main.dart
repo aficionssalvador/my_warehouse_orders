@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_chat_friend/screens/home_screen.dart';
-import 'package:my_chat_friend/screens/order_line_scan.dart';
+import '/screens/home_screen.dart';
+import '/screens/order_line_scan.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mi Aplicación',
       initialRoute: '/',
+      debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => MyHomePage(),
         '/order_line_scan': (context) => ScannerScreen(),

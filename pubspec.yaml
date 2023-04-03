@@ -1,5 +1,5 @@
-name: my_chat_friend
-description: A Chat with IA using prompt enginiering.
+name: my_wharehouse_orders
+description: Control de ordenes de almacen.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -37,6 +37,8 @@ dependencies:
   uuid: ^3.0.5
   tokenizer: ^1.0.0
   flutter_tts: ^3.6.3
+  sqflite: ^2.2.6
+  path: ^1.8.2
   # camera: ^0.9.4+5
   camera: ^0.10.3+2
   barcode_scan2: ^4.2.4
