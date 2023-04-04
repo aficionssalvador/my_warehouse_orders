@@ -24,10 +24,12 @@ class MyHomePage extends StatelessWidget {
             tractametCodiBarresSeleccionat = TractametCodiBarresSeleccionat.llegirProducte;
             Navigator.pushNamed(context, '/order_line_scan');
           }),
-          /*
-          _buildButton(context, 'Pantalla 3', Colors.blue, () {
-            Navigator.pushNamed(context, '/pantalla3');
+          _buildButton(context, 'Productos', Colors.blue, () {
+            modoScanner = 0;
+            tractametCodiBarresSeleccionat = TractametCodiBarresSeleccionat.llegirProducte;
+            Navigator.pushNamed(context, '/productos');
           }),
+          /*
           _buildButton(context, 'Pantalla 4', Colors.orange, () {
             Navigator.pushNamed(context, '/pantalla4');
           }),
