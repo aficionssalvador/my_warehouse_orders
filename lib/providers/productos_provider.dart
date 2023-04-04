@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '/models/productos_model.dart';
 import 'general.dart';
 
@@ -18,10 +20,11 @@ class ProductoDataProvider {
     final db = await database;
     final List<Map<String, dynamic>> maps;
     if (filtro == "") {
-      maps = await db.query('productos');
+      maps = [] as List<Map<String, Object?>>;
+      // maps = await db.query('productos');
     } else {
       maps = await db.query(
-        'stocks',
+        'productos',
         where: filtro,
       );
     }
@@ -79,4 +82,58 @@ tdhr TEXT
     await db.execute('CREATE INDEX IF NOT EXISTS idx_productos_grp3 ON productos(grp3);');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_productos_grp4 ON productos(grp4);');
   }
+
+  Future<void> fetchAndStoreProductos() async {
+    // Reemplaza esta URL con la URL de tu servicio REST
+    final url = 'https://api.example.com/productos';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        List<dynamic> productosJson = json.decode(response.body);
+        for (var productoJson in productosJson) {
+          Producto producto = Producto.fromMap(productoJson);
+          await insertProducto(producto);
+        }
+      } else {
+        throw Exception('Error al obtener productos del servidor');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+/*
+[
+  {
+    "id": "1",
+    "id2": "1001",
+    "grp1": "Electrónica",
+    "grp2": "Computadoras",
+    "grp3": "Laptops",
+    "grp4": "Gaming",
+    "descripcion": "Laptop Gamer XYZ",
+    "tdhr": "2023-04-05T08:30:00"
+  },
+  {
+    "id": "2",
+    "id2": "1002",
+    "grp1": "Electrónica",
+    "grp2": "Computadoras",
+    "grp3": "Laptops",
+    "grp4": "Ultrabook",
+    "descripcion": "Ultrabook ABC",
+    "tdhr": "2023-04-05T10:45:00"
+  },
+  {
+    "id": "3",
+    "id2": "2001",
+    "grp1": "Hogar",
+    "grp2": "Cocina",
+    "grp3": "Utensilios",
+    "grp4": "Cuchillos",
+    "descripcion": "Set de cuchillos de cocina",
+    "tdhr": "2023-04-05T14:20:00"
+  }
+]
+*/
 }
