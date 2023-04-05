@@ -28,13 +28,13 @@ Future<http.Response> getHttpWithAuth(String url) async {
   String token = (await getToken()) ?? "";
   String urlBase = currentConfiguracion!.apiKey;
   if (token.isEmpty) {
-    response = await http.get(Uri.parse(urlBase+url));
+    response = await http.get(Uri.parse(urlBase + url));
   } else {
     // Agregamos el token de autenticación en el encabezado de la solicitud HTTP
     Map<String, String> headers = {'Authorization': 'Bearer $token'};
 
     // Enviamos la solicitud HTTP con el encabezado de autenticación
-    response = await http.get(Uri.parse(urlBase+url), headers: headers);
+    response = await http.get(Uri.parse(urlBase + url), headers: headers);
   }
   return response;
 }
@@ -45,13 +45,13 @@ Future<http.Response> postHttpWithAuth(String url, dynamic body) async {
   String token = (await getToken()) ?? "";
   String urlBase = currentConfiguracion!.apiKey;
   if (token.isEmpty) {
-    response = await http.post(Uri.parse(urlBase+url), body: body);
+    response = await http.post(Uri.parse(urlBase + url), body: body);
   } else {
     // Agregamos el token de autenticación en el encabezado de la solicitud HTTP
     Map<String, String> headers = {'Authorization': 'Bearer $token'};
 
     // Enviamos la solicitud HTTP con el encabezado de autenticación y el cuerpo de la solicitud
-    response = await http.post(Uri.parse(urlBase+url), headers: headers, body: body);
+    response = await http.post(Uri.parse(urlBase + url), headers: headers, body: body);
   }
   return response;
 }
