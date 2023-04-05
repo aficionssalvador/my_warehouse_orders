@@ -51,7 +51,7 @@ Future<http.Response> postHttpWithAuth(String url, dynamic body) async {
     Map<String, String> headers = {'Authorization': 'Bearer $token'};
 
     // Enviamos la solicitud HTTP con el encabezado de autenticación y el cuerpo de la solicitud
-    response = await http.post(Uri.parse(urlBaseurl), headers: headers, body: body);
+    response = await http.post(Uri.parse(urlBase+url), headers: headers, body: body);
   }
   return response;
 }
