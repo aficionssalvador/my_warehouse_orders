@@ -5,7 +5,7 @@ import 'dart:convert';
 import '/models/productos_model.dart';
 import 'general.dart';
 
-
+// ok
 ProductoDataProvider currentProductoDataProvider = ProductoDataProvider();
 
 class ProductoDataProvider {
@@ -85,7 +85,7 @@ tdhr TEXT
 
   Future<void> fetchAndStoreProductos() async {
     // Reemplaza esta URL con la URL de tu servicio REST
-    final url = 'https://api.example.com/productos';
+    final url = '/productos';
 
     try {
       final response = await http.getHttpWithAuth(url);
