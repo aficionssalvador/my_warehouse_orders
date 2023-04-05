@@ -36,11 +36,14 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
 
   Future<void> _loadConfigData() async {
     final Configuracion data = await _readDataFromLocal();
-    _idClienteController.text = data.idCliente;
-    _usuarioController.text = data.usuario;
-    _urlController.text = data.url;
-    _apiKeyController.text = data.apiKey;
-    //_apiKeyController.text = (await Myhttp.getToken()) ?? "";
+    //final String tk = (await Myhttp.getToken())??"";
+    setState(() {
+      _idClienteController.text = data.idCliente;
+      _usuarioController.text = data.usuario;
+      _urlController.text = data.url;
+      _apiKeyController.text = data.apiKey;
+      //_apiKeyController.text = tk;
+    });
   }
 
   Future<Configuracion> _readDataFromLocal() async {
@@ -63,12 +66,16 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
   Future<void> _saveDataToLocal(Configuracion configuracion) async {
     String tk = configuracion.apiKey;
     await Myhttp.setToken(tk);
-    // configuracion.apiKey = "";
+    //configuracion.apiKey = "";
     final directory = await getApplicationDocumentsDirectory();
     final filePath = '${directory.path}/$fileNameConfig';
     final file = File(filePath);
     final jsonData = json.encode(configuracion.toMap());
     await file.writeAsString(jsonData);
+  }
+
+  bool _isReadOnly(TextEditingController controller) {
+    return controller.text.isNotEmpty;
   }
 
   @override
@@ -83,7 +90,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
           children: [
             TextField(
               controller: _idClienteController,
-              readOnly: _idClienteController.text.isNotEmpty,
+              readOnly: _isReadOnly(_idClienteController),
               decoration: InputDecoration(labelText: 'ID Cliente'),
             ),
             TextField(
@@ -92,12 +99,13 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
             ),
             TextField(
               controller: _urlController,
-              readOnly: _urlController.text.isNotEmpty,
+              readOnly: _isReadOnly(_urlController),
               decoration: InputDecoration(labelText: 'URL base'),
+              obscureText: _isReadOnly(_urlController),
             ),
             TextField(
               controller: _apiKeyController,
-              readOnly: _apiKeyController.text.isNotEmpty,
+              readOnly: _isReadOnly(_apiKeyController),
               decoration: InputDecoration(labelText: 'ApiKey'),
               obscureText: true,
             ),
