@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 import '/models/configuracion_model.dart';
-import '/providers/flutter_secure_storage.dart' as Myhttp;
+import '/providers/flutter_secure_storage_controler.dart' as Myhttp;
 
 class ConfiguracionScreen extends StatefulWidget {
   @override
@@ -63,7 +63,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
   Future<void> _saveDataToLocal(Configuracion configuracion) async {
     String tk = configuracion.apiKey;
     await Myhttp.setToken(tk);
-    configuracion.apiKey = "";
+    // configuracion.apiKey = "";
     final directory = await getApplicationDocumentsDirectory();
     final filePath = '${directory.path}/$fileNameConfig';
     final file = File(filePath);
@@ -94,7 +94,6 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
               controller: _urlController,
               readOnly: _urlController.text.isNotEmpty,
               decoration: InputDecoration(labelText: 'URL base'),
-              obscureText: true,
             ),
             TextField(
               controller: _apiKeyController,
@@ -117,7 +116,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
                 );
                 Navigator.pop(context);
               },
-              child: Text('  Guardar  ', style: TextStyle(fontSize: 20.0)),
+              child: Text(' Guardar ', style: TextStyle(fontSize: 20.0)),
             ),
           ],
         ),
