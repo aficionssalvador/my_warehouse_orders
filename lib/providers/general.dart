@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
-import 'package:my_wharehouse_orders/u2/u2_string_utils.dart';
+import '/u2/u2_string_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
@@ -10,7 +10,7 @@ import 'stocks_provider.dart';
 import 'inventarios_provider.dart';
 import 'ordenes_provider.dart';
 import 'ordenes_detalle_provider.dart';
-import 'package:my_wharehouse_orders/models/configuracion_model.dart';
+import '/models/configuracion_model.dart';
 
 /// variables estaticas globales
 int modoScanner = 0;
