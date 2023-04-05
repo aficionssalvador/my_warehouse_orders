@@ -38,7 +38,21 @@ const productos = [
 ];
 
 app.get('/api/productos', (req, res) => {
-  res.json(productos);
+  // llamada con filtro http://localhost:3000/api/productos?descripcion=Laptop
+  if (descripcion) {
+    const productosFiltrados = productos.filter(producto =>
+      producto.descripcion.toLowerCase().includes(descripcion.toLowerCase())
+    );
+    res.json(productosFiltrados);
+  } else {
+    res.json(productos);
+  }
+});
+
+app.post('/api/productos', (req, res) => {
+  const nuevoProducto = req.body;
+  productos.push(nuevoProducto);
+  res.status(201).json(nuevoProducto);
 });
 
 app.listen(port, () => {
