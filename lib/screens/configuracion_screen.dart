@@ -35,11 +35,12 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
   }
 
   Future<void> _loadConfigData() async {
-    final data = await _readDataFromLocal();
+    final Configuracion data = await _readDataFromLocal();
     _idClienteController.text = data.idCliente;
     _usuarioController.text = data.usuario;
     _urlController.text = data.url;
-    _apiKeyController.text = (await Myhttp.getToken()) ?? "";
+    _apiKeyController.text = data.apiKey;
+    //_apiKeyController.text = (await Myhttp.getToken()) ?? "";
   }
 
   Future<Configuracion> _readDataFromLocal() async {
@@ -60,6 +61,9 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
   }
 
   Future<void> _saveDataToLocal(Configuracion configuracion) async {
+    String tk = configuracion.apiKey;
+    await Myhttp.setToken(tk);
+    configuracion.apiKey = "";
     final directory = await getApplicationDocumentsDirectory();
     final filePath = '${directory.path}/$fileNameConfig';
     final file = File(filePath);
@@ -105,13 +109,13 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
                   idCliente: _idClienteController.text,
                   usuario: _usuarioController.text,
                   url: _urlController.text,
-                  apiKey: "",
+                  apiKey: _apiKeyController.text,
                 );
                 await _saveDataToLocal(configuracion);
-                await Myhttp.setToken(_urlController.text);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Configuración guardada')),
                 );
+                Navigator.pop(context);
               },
               child: Text('  Guardar  ', style: TextStyle(fontSize: 20.0)),
             ),
