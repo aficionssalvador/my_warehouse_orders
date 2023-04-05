@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import '/models/configuracion_model.dart'; // Reemplaza esto con la ruta correcta al archivo configuracion_model.dart
+
+import '/models/configuracion_model.dart';
+import '/providers/flutter_secure_storage.dart' as Myhttp;
 
 class ConfiguracionScreen extends StatefulWidget {
   @override
@@ -12,7 +14,8 @@ class ConfiguracionScreen extends StatefulWidget {
 class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
   final TextEditingController _idClienteController = TextEditingController();
   final TextEditingController _usuarioController = TextEditingController();
-  final TextEditingController _contrasenaController = TextEditingController();
+  final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _apiKeyController = TextEditingController();
 
   String fileNameConfig = 'my_warehouse_orders_config.json';
 
@@ -26,7 +29,8 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
   void dispose() {
     _idClienteController.dispose();
     _usuarioController.dispose();
-    _contrasenaController.dispose();
+    _urlController.dispose();
+    _apiKeyController.dispose();
     super.dispose();
   }
 
@@ -34,7 +38,8 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
     final data = await _readDataFromLocal();
     _idClienteController.text = data.idCliente;
     _usuarioController.text = data.usuario;
-    _contrasenaController.text = data.contrasena;
+    _urlController.text = data.url;
+    _apiKeyController.text = (await Myhttp.getToken()) ?? "";
   }
 
   Future<Configuracion> _readDataFromLocal() async {
@@ -47,10 +52,10 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
         final data = Configuracion.fromMap(json.decode(jsonData));
         return data;
       } else {
-        return Configuracion(idCliente: '', usuario: '', contrasena: '');
+        return Configuracion(idCliente: '', usuario: '', url: '', apiKey: '');
       }
     } catch (e) {
-      return Configuracion(idCliente: '', usuario: '', contrasena: '');
+      return Configuracion(idCliente: '', usuario: '', url: '', apiKey: '');
     }
   }
 
@@ -74,6 +79,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
           children: [
             TextField(
               controller: _idClienteController,
+              readOnly: _idClienteController.text.isNotEmpty,
               decoration: InputDecoration(labelText: 'ID Cliente'),
             ),
             TextField(
@@ -81,8 +87,15 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
               decoration: InputDecoration(labelText: 'Usuario'),
             ),
             TextField(
-              controller: _contrasenaController,
-              decoration: InputDecoration(labelText: 'Contraseña'),
+              controller: _urlController,
+              readOnly: _urlController.text.isNotEmpty,
+              decoration: InputDecoration(labelText: 'URL base'),
+              obscureText: true,
+            ),
+            TextField(
+              controller: _apiKeyController,
+              readOnly: _apiKeyController.text.isNotEmpty,
+              decoration: InputDecoration(labelText: 'ApiKey'),
               obscureText: true,
             ),
             SizedBox(height: 16),
@@ -91,9 +104,11 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
                 final configuracion = Configuracion(
                   idCliente: _idClienteController.text,
                   usuario: _usuarioController.text,
-                  contrasena: _contrasenaController.text,
+                  url: _urlController.text,
+                  apiKey: "",
                 );
                 await _saveDataToLocal(configuracion);
+                await Myhttp.setToken(_urlController.text);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Configuración guardada')),
                 );

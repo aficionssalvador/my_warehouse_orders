@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
-import 'package:http/http.dart' as http;
+import 'flutter_secure_storage.dart' as http;
 import 'dart:convert';
 import '/models/productos_model.dart';
 import 'general.dart';
@@ -88,7 +88,7 @@ tdhr TEXT
     final url = 'https://api.example.com/productos';
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.getHttpWithAuth(url);
       if (response.statusCode == 200) {
         List<dynamic> productosJson = json.decode(response.body);
         for (var productoJson in productosJson) {

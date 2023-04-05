@@ -1,19 +1,22 @@
 class Configuracion {
   String idCliente;
   String usuario;
-  String contrasena;
+  String url;
+  String apiKey;
 
   Configuracion({
     required this.idCliente,
     required this.usuario,
-    required this.contrasena,
+    required this.url,
+    required this.apiKey,
   });
 
   Map<dynamic, dynamic> toMap() {
     return {
       'idCliente': idCliente,
       'usuario': usuario,
-      'contrasena': contrasena,
+      'url': url,
+      'apiKey': apiKey,
     };
   }
 
@@ -22,13 +25,15 @@ class Configuracion {
       return Configuracion(
         idCliente: map['idCliente'],
         usuario: map['usuario'],
-        contrasena: map['contrasena'],
+        url: map['url'],
+        apiKey: map['apiKey'],
       );
     } catch(e) {
       return Configuracion(
         idCliente: "",
         usuario: "",
-        contrasena: "",
+        url: "",
+        apiKey: "",
       );
     }
   }
