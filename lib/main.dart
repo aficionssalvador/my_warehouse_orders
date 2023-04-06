@@ -11,6 +11,8 @@ import '/screens/producto_detalle_screen.dart';
 import '/screens/configuracion_screen.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Asegúrate de inicializar los bindings aquí.
+
   await initializeGlobalData();
 
   runApp(MyApp());

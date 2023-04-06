@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-
 import '/models/configuracion_model.dart';
-import '/providers/flutter_secure_storage_controler.dart' as Myhttp;
 
 class ConfiguracionScreen extends StatefulWidget {
   @override
@@ -65,7 +63,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
 
   Future<void> _saveDataToLocal(Configuracion configuracion) async {
     String tk = configuracion.apiKey;
-    await Myhttp.setToken(tk);
+    // todo await Myhttp.setToken(tk);
     //configuracion.apiKey = "";
     final directory = await getApplicationDocumentsDirectory();
     final filePath = '${directory.path}/$fileNameConfig';

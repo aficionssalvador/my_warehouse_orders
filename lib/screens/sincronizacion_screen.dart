@@ -35,6 +35,7 @@ class _SincronizacionScreenState extends State<SincronizacionScreen> {
                       onPressed: () {
                         // Llama aquí a la función para sincronizar los datos de cada tabla
                         print('Recuperar ${tablas[index]}');
+                        Recuperar(tablas[index]);
                       },
                       child: Text('Recuperar'),
                     ),
@@ -65,5 +66,11 @@ class _SincronizacionScreenState extends State<SincronizacionScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> Recuperar(String nombreTabla) async {
+    if (nombreTabla == tablas[0]) {
+      currentProductoDataProvider.fetchAndStoreProductos();
+    }
   }
 }

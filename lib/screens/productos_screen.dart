@@ -41,7 +41,9 @@ class _ProductosScreenState extends State<ProductosScreen> {
             child: TextField(
               controller: _filtroController,
               onChanged: (value) {
-                setState(() {});
+                setState(() {
+                  currentProductoDataProvider.getProductos(_filtroController.text);
+                });
               },
               decoration: InputDecoration(
                 labelText: 'Filtrar',
@@ -52,9 +54,9 @@ class _ProductosScreenState extends State<ProductosScreen> {
           ),
           Expanded(
             child: Consumer<ProductoDataProvider>(
-              builder: (context, productoDataProvider, child) {
+              builder: (context, currentProductoDataProvider, child) {
                 return FutureBuilder<List<Producto>>(
-                  future: productoDataProvider.getProductos(_filtroController.text),
+                  future: currentProductoDataProvider.getProductos(_filtroController.text),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
                       if (snapshot.hasData) {

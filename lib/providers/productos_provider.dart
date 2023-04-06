@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
-import 'flutter_secure_storage_controler.dart' as http;
+import 'http_controller.dart' as httpmy;
 import 'dart:convert';
 import '/models/productos_model.dart';
 import 'general.dart';
@@ -20,8 +20,8 @@ class ProductoDataProvider {
     final db = await database;
     final List<Map<String, dynamic>> maps;
     if (filtro == "") {
-      maps = [] as List<Map<String, Object?>>;
-      // maps = await db.query('productos');
+      //maps = [] as List<Map<String, Object?>>;
+      maps = await db.query('productos');
     } else {
       maps = await db.query(
         'productos',
@@ -85,15 +85,19 @@ tdhr TEXT
 
   Future<void> fetchAndStoreProductos() async {
     // Reemplaza esta URL con la URL de tu servicio REST
-    final url = '/productos';
+    final url = await currentConfiguracion!.url + '/api/productos';
 
     try {
-      final response = await http.getHttpWithAuth(url);
+      final response = await httpmy.getHttpWithAuth(url);
       if (response.statusCode == 200) {
         List<dynamic> productosJson = json.decode(response.body);
         for (var productoJson in productosJson) {
           Producto producto = Producto.fromMap(productoJson);
-          await insertProducto(producto);
+          try {
+            await insertProducto(producto);
+          } catch (e) {
+            await updateProducto(producto);
+          }
         }
       } else {
         throw Exception('Error al obtener productos del servidor');

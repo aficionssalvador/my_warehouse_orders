@@ -38,10 +38,14 @@ const productos = [
 ];
 
 app.get('/api/productos', (req, res) => {
-  // llamada con filtro http://localhost:3000/api/productos?descripcion=Laptop
-  if (descripcion) {
+  // llamada con filtro http://localhost:3000/api/productos?filtro=Laptop
+  filtro = "";
+  if (req.params["filtro"]) {
+    filtro = req.params["filtro"];
+  }
+  if (filtro) {
     const productosFiltrados = productos.filter(producto =>
-      producto.descripcion.toLowerCase().includes(descripcion.toLowerCase())
+      producto.filtro.toLowerCase().includes(filtro.toLowerCase())
     );
     res.json(productosFiltrados);
   } else {

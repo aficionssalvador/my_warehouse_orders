@@ -102,7 +102,7 @@ Future<Map<dynamic, dynamic>> saveDataStatToLocal(String localFile, String table
 
 Future<Map<dynamic, dynamic>> saveToLocalFile(String localFile,  Map<String, dynamic> data) async {
   final directory = await getApplicationDocumentsDirectory();
-  final filePath = '${directory.path}/$fileNameStat';
+  final filePath = '${directory.path}/$localFile';
   final file = File(filePath);
   final jsonData = json.encode(data);
   await file.writeAsString(jsonData);
@@ -112,7 +112,7 @@ Future<Map<dynamic, dynamic>> saveToLocalFile(String localFile,  Map<String, dyn
 Future<Map<dynamic, dynamic>> readFromLocal(String localFile) async {
   try {
     final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/$fileNameStat';
+    final filePath = '${directory.path}/$localFile';
     final file = File(filePath);
     if (await file.exists()) {
       final jsonData = await file.readAsString();
@@ -128,6 +128,6 @@ Future<Map<dynamic, dynamic>> readFromLocal(String localFile) async {
 
 Future<void> initializeGlobalData() async {
   currentFileStat = await readFromLocal(fileNameStat);
-  currentConfiguracion = Configuracion.fromMap(await readFromLocal(configFileName));
+  currentConfiguracion = await Configuracion.fromMap(await readFromLocal(configFileName));
 }
 
