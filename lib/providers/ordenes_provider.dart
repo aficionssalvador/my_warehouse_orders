@@ -14,8 +14,8 @@ class OrdenesDataProvider {
 // Dentro de la clase ProductoDataProvider
 
 // Método para crear la tabla de ordenes
-  Future<void> createOrdenTable() async {
-    final db = await database;
+  Future<void> createOrdenTable(Database db) async {
+    //final db = await database;
     await db.execute('''
     CREATE TABLE IF NOT EXISTS ordenes (
       id_orden TEXT PRIMARY KEY,

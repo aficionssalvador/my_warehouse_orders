@@ -9,8 +9,8 @@ InvetariosDataProvider currentInvetariosDataProvider = InvetariosDataProvider();
 // Dentro de la clase InvetariosDataProvider
 class InvetariosDataProvider {
 // Método para crear la tabla de Invetarios
-  Future<void> createInvetarioTable() async {
-    final db = await database;
+  Future<void> createInvetarioTable(Database db) async {
+    //final db = await database;
     await db.execute('''
     CREATE TABLE IF NOT EXISTS inventarios (
       id TEXT,

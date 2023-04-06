@@ -17,7 +17,10 @@ int modoScanner = 0;
 String codiBarresSeleccionat = '';
 TractametCodiBarresSeleccionat tractametCodiBarresSeleccionat = TractametCodiBarresSeleccionat.llegirProducte;
 
+// Agregue esta variable al principio de general.dart
+bool _isOpeningDatabase = false;
 Database? _database;
+
 String fileNameStat = 'my_warehouse_orders_state_recepcion.json';
 String configFileName = 'my_warehouse_orders_config.json';
 Map<dynamic, dynamic> currentFileStat = {};
@@ -40,19 +43,36 @@ enum AccioBarresSeleccionat {
 
 // Agregar al método get database existente
 Future<Database> get database async {
+  print("get database 1");
   if (_database != null) return _database!;
+  print("get database 2");
+  // Agregue esta condición para evitar abrir la base de datos varias veces
+  if (_isOpeningDatabase) {
+    throw Exception('La base de datos ya se está abriendo.');
+  }
+
   final dbPath = await getDatabasesPath();
+  print("get database 4");
+  _isOpeningDatabase = true;
   _database = await openDatabase(
     p.join(dbPath, 'my_warehouse_order.db'),
     onCreate: (db, version) async {
-      await currentProductoDataProvider.createTable();
-      await currentStocksDataProvider.createStockTable();
-      await currentInvetariosDataProvider.createInvetarioTable();
-      await currentOrdenesDataProvider.createOrdenTable();
-      await currentOrdenesDetalleDataProvider.createOrdenDetalleTable();
+      print("get database creando 1");
+      await currentProductoDataProvider.createTable(db);
+      print("get database creando 2");
+      await currentStocksDataProvider.createStockTable(db);
+      print("get database creando 3");
+      await currentInvetariosDataProvider.createInvetarioTable(db);
+      print("get database creando 4");
+      await currentOrdenesDataProvider.createOrdenTable(db);
+      print("get database creando 5");
+      await currentOrdenesDetalleDataProvider.createOrdenDetalleTable(db);
+      print("get database todo");
     },
     version: 1,
   );
+  _isOpeningDatabase = false;
+
   return _database!;
 }
 

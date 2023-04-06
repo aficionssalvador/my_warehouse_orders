@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<ProductoDataProvider>(
-          create: (_) => ProductoDataProvider(),
+          create: (context) => ProductoDataProvider(),
           // Elimina la siguiente línea ya que la clase ProductoDataProvider no tiene un método dispose()
           // dispose: (_, productoDataProvider) => productoDataProvider.dispose(),
         ),

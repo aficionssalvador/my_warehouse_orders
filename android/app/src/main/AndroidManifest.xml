@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="cat.srigau.my_wharehouse_orders">
+  <!-- Añade el permiso READ_EXTERNAL_STORAGE aquí -->
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
    <application
         android:label="my_wharehouse_orders"
         android:name="${applicationName}"

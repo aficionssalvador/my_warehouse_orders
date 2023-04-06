@@ -11,8 +11,8 @@ StocksDataProvider currentStocksDataProvider = StocksDataProvider();
 // Dentro de la clase StocksDataProvider
 class StocksDataProvider {
 // Método para crear la tabla de stocks
-  Future<void> createStockTable() async {
-    final db = await database;
+  Future<void> createStockTable(Database db) async {
+    // final db = await database;
     await db.execute('''
     CREATE TABLE IF NOT EXISTS stocks (
       id TEXT,

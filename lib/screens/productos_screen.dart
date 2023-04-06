@@ -11,6 +11,7 @@ class ProductosScreen extends StatefulWidget {
 
 class _ProductosScreenState extends State<ProductosScreen> {
   TextEditingController _filtroController = TextEditingController();
+  final _formKey = GlobalKey<FormState>(); // Agrega un GlobalKey para el Form
 
   @override
   Widget build(BuildContext context) {
@@ -38,20 +39,36 @@ class _ProductosScreenState extends State<ProductosScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _filtroController,
-              onChanged: (value) {
-                setState(() {
-                  currentProductoDataProvider.getProductos(_filtroController.text);
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'Filtrar',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.search),
+            child: Form( // Envuelve el TextField en un Form
+              key: _formKey,
+              child: TextFormField(
+                controller: _filtroController,
+                onFieldSubmitted: (value) { // Cambia onChanged a onFieldSubmitted
+                  setState(() {
+                    currentProductoDataProvider.getProductos(_filtroController.text);
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Filtrar',
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton( // Agrega un botón al final del TextField
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        setState(() {
+                          currentProductoDataProvider.getProductos(_filtroController.text);
+                        });
+                      }
+                    },
+                  ),
+                ),
               ),
             ),
+
+
+
           ),
+
           Expanded(
             child: Consumer<ProductoDataProvider>(
               builder: (context, currentProductoDataProvider, child) {

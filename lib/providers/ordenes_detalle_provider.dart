@@ -9,8 +9,8 @@ OrdenesDetalleDataProvider currentOrdenesDetalleDataProvider = OrdenesDetalleDat
 class OrdenesDetalleDataProvider {
 
 // Método para crear la tabla de ordenes_detalle
-  Future<void> createOrdenDetalleTable() async {
-    final db = await database;
+  Future<void> createOrdenDetalleTable(Database db) async {
+    //final db = await database;
     await db.execute('''
     CREATE TABLE IF NOT EXISTS ordenes_detalle (
       id_orden TEXT,

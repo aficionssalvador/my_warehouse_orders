@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
+import 'package:flutter/foundation.dart';
 import 'http_controller.dart' as httpmy;
 import 'dart:convert';
 import '/models/productos_model.dart';
@@ -8,7 +9,10 @@ import 'general.dart';
 // ok
 ProductoDataProvider currentProductoDataProvider = ProductoDataProvider();
 
+//class ProductoDataProvider extends ChangeNotifier {
 class ProductoDataProvider {
+  List<Producto> _productos = [];
+  List<Producto> get productos => _productos;
 
   Future<void> insertProducto(Producto producto) async {
     final db = await database;
@@ -17,20 +21,26 @@ class ProductoDataProvider {
   }
 
   Future<List<Producto>> getProductos(String filtro) async {
+    print("getProductos 1: $filtro");
     final db = await database;
+    print("getProductos 2: $filtro");
     final List<Map<String, dynamic>> maps;
+    print("getProductos 3: $filtro");
     if (filtro == "") {
-      //maps = [] as List<Map<String, Object?>>;
-      maps = await db.query('productos');
+      _productos = [];
+      return _productos;
+      //maps = await db.query('productos');
     } else {
       maps = await db.query(
         'productos',
         where: filtro,
       );
     }
-    return List.generate(maps.length, (i) {
+    _productos =  List.generate(maps.length, (i) {
       return Producto.fromMap(maps[i]);
     });
+    // notifyListeners();
+    return _productos;
   }
 
   Future<void> updateProducto(Producto producto) async {
@@ -62,8 +72,8 @@ class ProductoDataProvider {
     await db.execute('DROP TABLE IF EXISTS productos');
   }
 
-  Future<void> createTable() async {
-    final db = await database;
+  Future<void> createTable(Database db) async {
+    //final db = await database;
     await db.execute('''
 CREATE TABLE IF NOT EXISTS productos (
 id TEXT PRIMARY KEY,
