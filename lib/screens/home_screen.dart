@@ -6,7 +6,7 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('my_wharedhouse_orders'),
+        title: Text('my_warehouse_orders'),
       ),
       body: GridView.count(
         crossAxisCount: 2,

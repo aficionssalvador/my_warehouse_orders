@@ -5,6 +5,22 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '/providers/general.dart';
 
+Future<String> showScannerModal(BuildContext context) async {
+  final result = await showDialog<String>(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: ScannerScreen(),
+        ),
+      );
+    },
+  );
+  return result ?? '';
+}
+
 
 class ScannerScreen extends StatefulWidget {
   @override
@@ -18,6 +34,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   QRViewController? _qrViewController;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String _barcode = '';
+  String _barcodeText = '';
   AnimationController? _animationController;
 
   @override
@@ -51,27 +68,61 @@ class _ScannerScreenState extends State<ScannerScreen>
     _initializeControllerFuture = _cameraController!.initialize();
     setState(() {});
   }
-
   Future<void> _scanBarcode() async {
     try {
       final result = await BarcodeScanner.scan();
+      String barcodeText = await codiBarresLLegit(AccioBarresSeleccionat.intentLectura, result.rawContent);
+      if (barcodeText.isEmpty) {
+        barcodeText = result.rawContent;
+      }
       setState(() {
-        _barcode = codiBarresLLegit(AccioBarresSeleccionat.intentLectura, result.rawContent);
+        _barcode = result.rawContent;
+        _barcodeText = barcodeText;
       });
     } catch (e) {
       print(e.toString());
     }
   }
 
-  void _onQRViewCreated(QRViewController controller) {
-
+  Future<void> _onQRViewCreated(QRViewController controller) async {
     _qrViewController = controller;
-    _qrViewController!.scannedDataStream.listen((scanData) {
+    _qrViewController!.scannedDataStream.listen((scanData) async {
+      String barcodeText = await codiBarresLLegit(AccioBarresSeleccionat.intentLectura, scanData.code!);
+      if (barcodeText.isEmpty) {
+        barcodeText = scanData.code!;
+      }
       setState(() {
-        _barcode = codiBarresLLegit(AccioBarresSeleccionat.intentLectura, scanData.code!);
+        _barcode = scanData.code!;
+        _barcodeText = barcodeText;
       });
     });
   }
+
+/*  Future<void> _scanBarcode() async {
+    try {
+      final result = await BarcodeScanner.scan();
+      setState(() {
+        _barcode = result.rawContent;
+        _barcodeText = await codiBarresLLegit(AccioBarresSeleccionat.intentLectura, result.rawContent);
+        if (_barcodeText.isEmpty) { _barcodeText = _barcode;}
+        });
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> _onQRViewCreated(QRViewController controller) async {
+
+    _qrViewController = controller;
+    _qrViewController!.scannedDataStream.listen((scanData) {
+      setState(() async {
+        _barcode = scanData.code!;
+        _barcodeText = await codiBarresLLegit(AccioBarresSeleccionat.intentLectura, scanData.code!);
+        if (_barcodeText.isEmpty) { _barcodeText = _barcode;}
+      });
+    });
+  }
+*/
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +133,7 @@ class _ScannerScreenState extends State<ScannerScreen>
       body: Column(
         children: [
           Expanded(
+            flex: 1,
             child: Stack(
               children: [
                 (modoScanner == 0) ? _buildCameraPreview() : _buildQRView(),
@@ -90,7 +142,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           ),
           SizedBox(height: 16),
           Text(
-            '$_barcode',
+            '$_barcodeText',
             style: TextStyle(fontSize: 24),
           ),
           SizedBox(height: 16),
@@ -105,9 +157,9 @@ class _ScannerScreenState extends State<ScannerScreen>
           ),
           SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {
-              codiBarresLLegit(AccioBarresSeleccionat.llegitCodi, _barcode);
-              Navigator.pop(context);
+            onPressed: () async {
+              String xx = await codiBarresLLegit(AccioBarresSeleccionat.llegitCodi, _barcode);
+              Navigator.pop(context, _barcode);
             },
             child: Text('         Aceptar         '),
           ),
@@ -121,7 +173,10 @@ class _ScannerScreenState extends State<ScannerScreen>
       future: _initializeControllerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return CameraPreview(_cameraController!);
+          return AspectRatio(
+            aspectRatio: 0.9,
+            child: CameraPreview(_cameraController!),
+          );
         } else {
           return Center(child: CircularProgressIndicator());
         }
@@ -130,20 +185,21 @@ class _ScannerScreenState extends State<ScannerScreen>
   }
 
   Widget _buildQRView() {
-    return QRView(
-      key
-          : qrKey,
-      onQRViewCreated: _onQRViewCreated,
-      overlay: QrScannerOverlayShape(
-        borderColor: Colors.red,
-        borderRadius: 10,
-        borderLength: 30,
-        borderWidth: 10,
-        cutOutSize: 300,
+    return AspectRatio(
+      aspectRatio: 0.9,
+      child: QRView(
+        key: qrKey,
+        onQRViewCreated: _onQRViewCreated,
+        overlay: QrScannerOverlayShape(
+          borderColor: Colors.red,
+          borderRadius: 10,
+          borderLength: 30,
+          borderWidth: 10,
+          cutOutSize: 300,
+        ),
+        overlayMargin: EdgeInsets.only(bottom: 120),
+        onPermissionSet: (ctrl, p) => _animationController?.forward(),
       ),
-      overlayMargin: EdgeInsets.only(bottom: 120),
-      // animationDuration: const Duration(milliseconds: 300),
-      onPermissionSet: (ctrl, p) => _animationController?.forward(),
     );
   }
 
@@ -161,4 +217,5 @@ class _ScannerScreenState extends State<ScannerScreen>
   {
     return (modoScanner==0)?'Foto':'Auto';
   }
+
 }

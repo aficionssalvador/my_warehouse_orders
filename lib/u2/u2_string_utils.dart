@@ -296,4 +296,15 @@ class U2StringUtils {
   static String DateTime2HoraMinSecS(DateTime dt) {
     return (dt.hour.toString().padLeft(2,'0')+':'+dt.minute.toString().padLeft(2,'0')+':'+dt.second.toString().padLeft(2,'0'));
   }
+  static String u2SQuoteEscaped(String cadena) {
+    String sortida = cadena;
+    if (u2Index(sortida, "'")>0) { sortida = sortida.replaceAll("'", "\\'");}
+    sortida = "'"+sortida+"'";
+    return sortida;
+  }
+  static String u2SQuote(String cadena) {
+    String sortida = cadena;
+    sortida = "'"+sortida+"'";
+    return sortida;
+  }
 }

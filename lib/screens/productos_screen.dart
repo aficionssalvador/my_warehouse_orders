@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wharehouse_orders/screens/order_line_scan.dart';
 import 'package:provider/provider.dart';
 import '/models/productos_model.dart';
 import '/providers/productos_provider.dart';
@@ -15,22 +16,31 @@ class _ProductosScreenState extends State<ProductosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // _filtroController.text = codiBarresSeleccionat;
     return Scaffold(
       appBar: AppBar(
         title: Text('Productos'),
         actions: [
           IconButton(
             icon: Icon(Icons.qr_code_scanner),
-            onPressed: () {
+            onPressed: () async {
               modoScanner = 1;
-              Navigator.pushNamed(context, '/order_line_scan');
+              // Navigator.pushNamed(context, '/order_line_scan');
+              String resultado = await showScannerModal(context);
+              _filtroController.text = resultado;
+              await currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text));
+              setState(() {});
             },
           ),
           IconButton(
             icon: Icon(Icons.bar_chart),
-            onPressed: () {
+            onPressed: () async {
               modoScanner = 0;
-              Navigator.pushNamed(context, '/order_line_scan');
+              // Navigator.pushNamed(context, '/order_line_scan');
+              String resultado = await showScannerModal(context);
+              _filtroController.text = resultado;
+              await currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text));
+              setState(() {});
             },
           ),
         ],
@@ -43,37 +53,31 @@ class _ProductosScreenState extends State<ProductosScreen> {
               key: _formKey,
               child: TextFormField(
                 controller: _filtroController,
-                onFieldSubmitted: (value) { // Cambia onChanged a onFieldSubmitted
-                  setState(() {
-                    currentProductoDataProvider.getProductos(_filtroController.text);
-                  });
+                onFieldSubmitted: (value) async { // Cambia onChanged a onFieldSubmitted
+                  await currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text));
+                  setState(() {});
                 },
                 decoration: InputDecoration(
                   labelText: 'Filtrar',
                   border: OutlineInputBorder(),
                   suffixIcon: IconButton( // Agrega un botón al final del TextField
                     icon: Icon(Icons.search),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        setState(() {
-                          currentProductoDataProvider.getProductos(_filtroController.text);
-                        });
+                        await currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text));
+                        setState(() {});
                       }
                     },
                   ),
                 ),
               ),
             ),
-
-
-
           ),
-
           Expanded(
             child: Consumer<ProductoDataProvider>(
               builder: (context, currentProductoDataProvider, child) {
                 return FutureBuilder<List<Producto>>(
-                  future: currentProductoDataProvider.getProductos(_filtroController.text),
+                  future: currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text)),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
                       if (snapshot.hasData) {
@@ -83,7 +87,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
                             Producto producto = snapshot.data![index];
                             return ListTile(
                               title: Text(producto.descripcion),
-                              subtitle: Text('ID: ${producto.id}'),
+                              subtitle: Text('ID: ${producto.id} Clave: ${producto.id2}'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

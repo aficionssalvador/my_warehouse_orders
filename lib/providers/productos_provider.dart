@@ -1,22 +1,29 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 // import 'package:flutter/foundation.dart';
-import 'http_controller.dart' as httpmy;
+import '/providers/http_controller.dart' as httpmy;
 import 'dart:convert';
 import '/models/productos_model.dart';
 import 'general.dart';
+import '/u2/u2_string_utils.dart';
 
 // ok
 ProductoDataProvider currentProductoDataProvider = ProductoDataProvider();
 
+String FiltroDeProductos(String filtro){
+  if (filtro == "*") {
+    return "true";
+  }
+  return  "id = ${U2StringUtils.u2SQuoteEscaped(filtro)} or id2 = ${U2StringUtils.u2SQuoteEscaped(filtro)}";
+}
 //class ProductoDataProvider extends ChangeNotifier {
 class ProductoDataProvider {
   List<Producto> _productos = [];
   List<Producto> get productos => _productos;
 
-  Future<void> insertProducto(Producto producto) async {
+  Future<int> insertProducto(Producto producto) async {
     final db = await database;
-    await db.insert('productos', producto.toMap(),
+    return await db.insert('productos', producto.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
@@ -43,9 +50,9 @@ class ProductoDataProvider {
     return _productos;
   }
 
-  Future<void> updateProducto(Producto producto) async {
+  Future<int> updateProducto(Producto producto) async {
     final db = await database;
-    await db.update(
+    return await db.update(
       'productos',
       producto.toMap(),
       where: 'id = ?',
@@ -53,18 +60,18 @@ class ProductoDataProvider {
     );
   }
 
-  Future<void> deleteProducto(String id) async {
+  Future<int> deleteProducto(String id) async {
     final db = await database;
-    await db.delete(
+    return await db.delete(
       'productos',
       where: 'id = ?',
       whereArgs: [id],
     );
   }
 
-  Future<void> deleteAllProductos() async {
+  Future<int> deleteAllProductos() async {
     final db = await database;
-    await db.delete('productos');
+    return await db.delete('productos');
   }
 
   Future<void> deleteTable() async {
@@ -93,22 +100,35 @@ tdhr TEXT
     await db.execute('CREATE INDEX IF NOT EXISTS idx_productos_grp4 ON productos(grp4);');
   }
 
-  Future<void> fetchAndStoreProductos() async {
-    // Reemplaza esta URL con la URL de tu servicio REST
-    final url = await currentConfiguracion!.url + '/api/productos';
-
+  Future<void> fetchAndStoreProductos([Map<String,dynamic>? parametrosGet]) async {
+    Uri? url = httpmy.getMiUrl('/api/productos',parametrosGet);
+    if (url == null) {
+      throw Exception('Falta configurar la URL');
+    }
     try {
-      final response = await httpmy.getHttpWithAuth(url);
+      final response = await httpmy.getHttpWithAuth(url!);
       if (response.statusCode == 200) {
         List<dynamic> productosJson = json.decode(response.body);
+        print("total productos: ${productosJson.length}");
+        //deleteAllProductos();
+        // var l = await getProductos("true");    print("antes de cargar: ${l.length}");
         for (var productoJson in productosJson) {
           Producto producto = Producto.fromMap(productoJson);
           try {
-            await insertProducto(producto);
+            int cnt;
+            cnt = await updateProducto(producto);
+            if (cnt == 0) {
+              int cnt = await insertProducto(producto);
+              print("insert ${producto.id}, $cnt");
+            } else {
+              print("update ${producto.id}, $cnt");
+            }
           } catch (e) {
-            await updateProducto(producto);
+            throw Exception('Error al qguardar productos en local');
           }
         }
+        var l2 = await getProductos("true");
+        print("despues de update: ${l2.length}");
       } else {
         throw Exception('Error al obtener productos del servidor');
       }

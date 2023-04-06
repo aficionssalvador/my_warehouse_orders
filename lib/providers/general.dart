@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+import 'package:my_wharehouse_orders/models/productos_model.dart';
+
 import '/u2/u2_string_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -15,6 +17,12 @@ import '/models/configuracion_model.dart';
 /// variables estaticas globales
 int modoScanner = 0;
 String codiBarresSeleccionat = '';
+
+String codiBarresProducte = '';
+String codiBarresSerialLot = '';
+String codiBarresDataCaducitat = '';
+String codiBarresFabricant = '';
+
 TractametCodiBarresSeleccionat tractametCodiBarresSeleccionat = TractametCodiBarresSeleccionat.llegirProducte;
 
 // Agregue esta variable al principio de general.dart
@@ -84,7 +92,7 @@ Future<void> closeDatabase() async {
   }
 }
 
-String codiBarresLLegit(AccioBarresSeleccionat accioBarresSeleccionat, String codi) {
+Future<String> codiBarresLLegit (AccioBarresSeleccionat accioBarresSeleccionat, String codi) async {
   String s = codi;
   switch (tractametCodiBarresSeleccionat) {
     case TractametCodiBarresSeleccionat.cap:
@@ -94,9 +102,25 @@ String codiBarresLLegit(AccioBarresSeleccionat accioBarresSeleccionat, String co
         case AccioBarresSeleccionat.cap:
           break;
         case AccioBarresSeleccionat.llegitCodi:
-          // todo: llegir el codi a la taula de productes
-          s = 'Codi trobat: $codi';
-          codiBarresSeleccionat = codi;
+          // codi llegit
+          // llegir el codi a la taula de productes
+          String filtre = FiltroDeProductos(codi);
+          final List<Producto> lstProd = await currentProductoDataProvider.getProductos(filtre);
+          final int count = await (lstProd).length;
+          if (count == 1) {
+            s = await lstProd[0].id; codiBarresSeleccionat = s;
+          }
+          break;
+        case AccioBarresSeleccionat.intentLectura:
+          // codi escanejat
+          String filtre = FiltroDeProductos(codi);
+          final List<Producto> lstProd = await currentProductoDataProvider.getProductos(filtre);
+          final int count = await (lstProd).length;
+          if (count > 1) {
+            s = 'Trobats ${lstProd.length} productes amb el codi $codi';
+          } else if (count == 1) {
+            s = "Trobat: ${lstProd[0].id} ${lstProd[0].descripcion}";
+          }
           break;
         default:
           break;
