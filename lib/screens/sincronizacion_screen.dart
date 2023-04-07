@@ -71,6 +71,9 @@ class _SincronizacionScreenState extends State<SincronizacionScreen> {
   Future<void> Recuperar(String nombreTabla) async {
     if (nombreTabla == tablas[0]) {
       currentProductoDataProvider.fetchAndStoreProductos();
-    }
+    } else if (nombreTabla == tablas[1]) {
+      currentStocksDataProvider.fetchAndStoreStocks();
+    } else ;
+
   }
 }

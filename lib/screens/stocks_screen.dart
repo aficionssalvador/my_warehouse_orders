@@ -1,23 +1,20 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:my_wharehouse_orders/providers/stocks_provider.dart';
 import 'package:my_wharehouse_orders/screens/order_line_scan.dart';
-import 'package:my_wharehouse_orders/u2/u2_string_utils.dart';
 import 'package:provider/provider.dart';
-import '/models/productos_model.dart';
-import '/providers/productos_provider.dart';
-import '/providers/general.dart';
-import '/screens/producto_detalle_screen.dart';
-import '/screens/stock_lista_screen.dart';
 import '/models/stocks_model.dart';
+import '/providers/stocks_provider.dart';
+import '/providers/general.dart';
+import '/providers/productos_provider.dart';
+import '/models/productos_model.dart';
+import '/screens/producto_detalle_screen.dart';
+import '/screens/stock_detalle_screen.dart';
 
-class ProductosScreen extends StatefulWidget {
+class StocksScreen extends StatefulWidget {
   @override
-  _ProductosScreenState createState() => _ProductosScreenState();
+  _StocksScreenState createState() => _StocksScreenState();
 }
 
-class _ProductosScreenState extends State<ProductosScreen> {
+class _StocksScreenState extends State<StocksScreen> {
   TextEditingController _filtroController = TextEditingController();
   final _formKey = GlobalKey<FormState>(); // Agrega un GlobalKey para el Form
 
@@ -26,7 +23,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
     // _filtroController.text = codiBarresSeleccionat;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Productos'),
+        title: Text('Stocks'),
         actions: [
           IconButton(
             icon: Icon(Icons.qr_code_scanner),
@@ -35,7 +32,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
               // Navigator.pushNamed(context, '/order_line_scan');
               String resultado = await showScannerModal(context);
               _filtroController.text = resultado;
-              await currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text));
+              await currentStocksDataProvider.getStocks(FiltroDeStocks(_filtroController.text));
               setState(() {});
             },
           ),
@@ -46,7 +43,7 @@ class _ProductosScreenState extends State<ProductosScreen> {
               // Navigator.pushNamed(context, '/order_line_scan');
               String resultado = await showScannerModal(context);
               _filtroController.text = resultado;
-              await currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text));
+              await currentStocksDataProvider.getStocks(FiltroDeStocks(_filtroController.text));
               setState(() {});
             },
           ),
@@ -61,17 +58,17 @@ class _ProductosScreenState extends State<ProductosScreen> {
               child: TextFormField(
                 controller: _filtroController,
                 onFieldSubmitted: (value) async { // Cambia onChanged a onFieldSubmitted
-                  await currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text));
+                  await currentStocksDataProvider.getStocks(FiltroDeStocks(_filtroController.text));
                   setState(() {});
                 },
                 decoration: InputDecoration(
                   labelText: 'Filtrar',
                   border: OutlineInputBorder(),
-                  suffixIcon: IconButton( // Agrega un botÃ³n al final del TextField
+                  suffixIcon: IconButton( // Agrega un botón al final del TextField
                     icon: Icon(Icons.search),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        await currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text));
+                        await currentStocksDataProvider.getStocks(FiltroDeStocks(_filtroController.text));
                         setState(() {});
                       }
                     },
@@ -81,37 +78,37 @@ class _ProductosScreenState extends State<ProductosScreen> {
             ),
           ),
           Expanded(
-            child: Consumer<ProductoDataProvider>(
-              builder: (context, currentProductoDataProvider, child) {
-                return FutureBuilder<List<Producto>>(
-                  future: currentProductoDataProvider.getProductos(FiltroDeProductos(_filtroController.text)),
+            child: Consumer<StocksDataProvider>(
+              builder: (context, currentStockDataProvider, child) {
+                return FutureBuilder<List<Stock>>(
+                  future: currentStocksDataProvider.getStocks(FiltroDeStocks(_filtroController.text)),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
                       if (snapshot.hasData) {
                         return ListView.builder(
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
-                            Producto producto = snapshot.data![index];
+                            Stock stock = snapshot.data![index];
                             return ListTile(
-                              title: Text(producto.descripcion),
-                              subtitle: Text('ID: ${producto.id} Clave: ${producto.id2}'),
+                              title: Text("${stock.ubicacion} ${stock.idSerialLote}"),
+                              subtitle: Text('ID: ${stock.id} Clave: ${stock.id2} Ser/Lote: ${stock.idSerialLote}'),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
                                     icon: Text("[ P ]"),
                                     onPressed: () async {
-                                      String resultado = await showProductoDetalleScreenModal(context, producto);
-                                      //Navigator.pushNamed(context, "/producto_detalle", arguments: producto);
-                                      // Navegar a la pantalla de ediciÃ³n
+                                      Producto p = await currentProductoDataProvider.getLookup(stock.id);
+                                      String xx = await showProductoDetalleScreenModal(context, p);
+                                      // Navigator.pushNamed(context, "/stock_detalle", arguments: stock);
+                                      // Navegar a la pantalla de edición
                                     },
                                   ),
                                   IconButton(
                                     icon: Text("[ S ]"),
                                     onPressed: () async {
-                                      // Eliminar producto
-                                      List<Stock> stocks = await currentStocksDataProvider.getStocks("id = ${U2StringUtils.u2SQuoteEscaped(producto.id)}");
-                                      String resultado = await showStockListaScreenModal(context, stocks);
+                                      // Eliminar stock
+                                      String xx = await showStockDetalleScreenModal(context, stock);
                                     },
                                   ),
                                 ],

@@ -32,6 +32,11 @@ class MyHomePage extends StatelessWidget {
             tractametCodiBarresSeleccionat = TractametCodiBarresSeleccionat.llegirProducte;
             Navigator.pushNamed(context, '/productos');
           }),
+          _buildButton(context, 'Stocks', Colors.blue, () {
+            modoScanner = 0;
+            tractametCodiBarresSeleccionat = TractametCodiBarresSeleccionat.llegirStrock;
+            Navigator.pushNamed(context, '/stocks');
+          }),
           _buildButton(context, 'Configu-\nración', Colors.orange, () {
             Navigator.pushNamed(context, '/configuracion');
           }),

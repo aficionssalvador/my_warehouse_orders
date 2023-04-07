@@ -16,6 +16,7 @@ String FiltroDeProductos(String filtro){
   }
   return  "id = ${U2StringUtils.u2SQuoteEscaped(filtro)} or id2 = ${U2StringUtils.u2SQuoteEscaped(filtro)}";
 }
+
 //class ProductoDataProvider extends ChangeNotifier {
 class ProductoDataProvider {
   List<Producto> _productos = [];
@@ -28,11 +29,11 @@ class ProductoDataProvider {
   }
 
   Future<List<Producto>> getProductos(String filtro) async {
-    print("getProductos 1: $filtro");
+    //print("getProductos 1: $filtro");
     final db = await database;
-    print("getProductos 2: $filtro");
+    //print("getProductos 2: $filtro");
     final List<Map<String, dynamic>> maps;
-    print("getProductos 3: $filtro");
+    //print("getProductos 3: $filtro");
     if (filtro == "") {
       _productos = [];
       return _productos;
@@ -48,6 +49,16 @@ class ProductoDataProvider {
     });
     // notifyListeners();
     return _productos;
+  }
+
+  Future<Producto> getLookup(String key) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps;
+    maps = await db.query(
+      'productos',
+      where: 'id = ${U2StringUtils.u2SQuoteEscaped(key)}',
+    );
+    return Producto.fromMap(maps[0]);
   }
 
   Future<int> updateProducto(Producto producto) async {
@@ -110,7 +121,7 @@ tdhr TEXT
       if (response.statusCode == 200) {
         List<dynamic> productosJson = json.decode(response.body);
         print("total productos: ${productosJson.length}");
-        //deleteAllProductos();
+        // deleteAllProductos();
         // var l = await getProductos("true");    print("antes de cargar: ${l.length}");
         for (var productoJson in productosJson) {
           Producto producto = Producto.fromMap(productoJson);
@@ -119,12 +130,12 @@ tdhr TEXT
             cnt = await updateProducto(producto);
             if (cnt == 0) {
               int cnt = await insertProducto(producto);
-              print("insert ${producto.id}, $cnt");
+              // print("insert ${producto.id}, $cnt");
             } else {
-              print("update ${producto.id}, $cnt");
+              // print("update ${producto.id}, $cnt");
             }
           } catch (e) {
-            throw Exception('Error al qguardar productos en local');
+            throw Exception('Error al guardar productos en local ${e.toString()}');
           }
         }
         var l2 = await getProductos("true");

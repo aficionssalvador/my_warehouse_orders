@@ -13,6 +13,8 @@ import 'inventarios_provider.dart';
 import 'ordenes_provider.dart';
 import 'ordenes_detalle_provider.dart';
 import '/models/configuracion_model.dart';
+import '/models/stocks_model.dart';
+import 'stocks_provider.dart';
 
 /// variables estaticas globales
 int modoScanner = 0;
@@ -38,6 +40,7 @@ Configuracion? currentConfiguracion;
 enum TractametCodiBarresSeleccionat {
   cap,
   llegirProducte,
+  llegirStrock,
   llegirDocument,
 
 }
@@ -51,31 +54,31 @@ enum AccioBarresSeleccionat {
 
 // Agregar al método get database existente
 Future<Database> get database async {
-  print("get database 1");
+  // print("get database 1");
   if (_database != null) return _database!;
-  print("get database 2");
+  // print("get database 2");
   // Agregue esta condición para evitar abrir la base de datos varias veces
   if (_isOpeningDatabase) {
     throw Exception('La base de datos ya se está abriendo.');
   }
 
   final dbPath = await getDatabasesPath();
-  print("get database 4");
+  // print("get database 4");
   _isOpeningDatabase = true;
   _database = await openDatabase(
     p.join(dbPath, 'my_warehouse_order.db'),
     onCreate: (db, version) async {
-      print("get database creando 1");
+      // print("get database creando 1");
       await currentProductoDataProvider.createTable(db);
-      print("get database creando 2");
+      // print("get database creando 2");
       await currentStocksDataProvider.createStockTable(db);
-      print("get database creando 3");
+      // print("get database creando 3");
       await currentInvetariosDataProvider.createInvetarioTable(db);
-      print("get database creando 4");
+      // print("get database creando 4");
       await currentOrdenesDataProvider.createOrdenTable(db);
-      print("get database creando 5");
+      // print("get database creando 5");
       await currentOrdenesDetalleDataProvider.createOrdenDetalleTable(db);
-      print("get database todo");
+      // print("get database todo");
     },
     version: 1,
   );
@@ -92,18 +95,47 @@ Future<void> closeDatabase() async {
   }
 }
 
-Future<String> codiBarresLLegit (AccioBarresSeleccionat accioBarresSeleccionat, String codi) async {
+Future<String> codiBarresLLegit(AccioBarresSeleccionat accioBarresSeleccionat, String codi) async {
   String s = codi;
   switch (tractametCodiBarresSeleccionat) {
     case TractametCodiBarresSeleccionat.cap:
+      break;
+    case TractametCodiBarresSeleccionat.llegirStrock:
+      switch (accioBarresSeleccionat){
+        case AccioBarresSeleccionat.cap:
+          break;
+        case AccioBarresSeleccionat.llegitCodi:
+          // codi llegit
+          // llegir el codi a la taula de stocks
+          String filtre = FiltroDeStocks(codi);
+          final List<Stock> lstStk = await currentStocksDataProvider.getStocks(filtre);
+          final int count = await (lstStk).length;
+          if (count == 1) {
+            s = await lstStk[0].id; codiBarresSeleccionat = s;
+          }
+          break;
+        case AccioBarresSeleccionat.intentLectura:
+          // codi escanejat
+          String filtre = FiltroDeStocks(codi);
+          final List<Stock> lstStk = await currentStocksDataProvider.getStocks(filtre);
+          final int count = await (lstStk).length;
+          if (count > 1) {
+            s = 'Encontrados ${lstStk.length} estocs con el codigo: $codi';
+          } else if (count == 1) {
+            s = "Encontrado: ${lstStk[0].id}, ubicado:  ${lstStk[0].ubicacion}, Ser/Lote: ${lstStk[0].idSerialLote}";
+          }
+          break;
+        default:
+          break;
+      }
       break;
     case TractametCodiBarresSeleccionat.llegirProducte:
       switch (accioBarresSeleccionat){
         case AccioBarresSeleccionat.cap:
           break;
         case AccioBarresSeleccionat.llegitCodi:
-          // codi llegit
-          // llegir el codi a la taula de productes
+        // codi llegit
+        // llegir el codi a la taula de productes
           String filtre = FiltroDeProductos(codi);
           final List<Producto> lstProd = await currentProductoDataProvider.getProductos(filtre);
           final int count = await (lstProd).length;
@@ -112,14 +144,14 @@ Future<String> codiBarresLLegit (AccioBarresSeleccionat accioBarresSeleccionat, 
           }
           break;
         case AccioBarresSeleccionat.intentLectura:
-          // codi escanejat
+        // codi escanejat
           String filtre = FiltroDeProductos(codi);
           final List<Producto> lstProd = await currentProductoDataProvider.getProductos(filtre);
           final int count = await (lstProd).length;
           if (count > 1) {
-            s = 'Trobats ${lstProd.length} productes amb el codi $codi';
+            s = 'Encontrados ${lstProd.length} productos con el codigo: $codi';
           } else if (count == 1) {
-            s = "Trobat: ${lstProd[0].id} ${lstProd[0].descripcion}";
+            s = "Encontrado: ${lstProd[0].id} - ${lstProd[0].descripcion}";
           }
           break;
         default:

@@ -1,42 +1,35 @@
 // Agregar al import existente
-import 'package:sqflite/sqflite.dart';
-import 'general.dart';
-import '/models/stocks_model.dart';
 import 'dart:async';
+import 'package:sqflite/sqflite.dart';
+import '/providers/http_controller.dart' as httpmy;
+import 'dart:convert';
+import '/models/stocks_model.dart';
+import 'general.dart';
+import '/u2/u2_string_utils.dart';
 
 // import 'stock.dart';
 
 StocksDataProvider currentStocksDataProvider = StocksDataProvider();
 
+String FiltroDeStocks(String filtro){
+  if (filtro == "*") {
+    return "true";
+  }
+  return  "id = ${U2StringUtils.u2SQuoteEscaped(filtro)} or " +
+      "id2 = ${U2StringUtils.u2SQuoteEscaped(filtro)} or " +
+      "ubicacion = ${U2StringUtils.u2SQuoteEscaped(filtro)} or " +
+      "idSerialLote = ${U2StringUtils.u2SQuoteEscaped(filtro)}";
+}
+
 // Dentro de la clase StocksDataProvider
 class StocksDataProvider {
-// Método para crear la tabla de stocks
-  Future<void> createStockTable(Database db) async {
-    // final db = await database;
-    await db.execute('''
-    CREATE TABLE IF NOT EXISTS stocks (
-      id TEXT,
-      id2 TEXT,
-      ubicacion TEXT,
-      cantidad REAL,
-      unidad_medida TEXT,
-      embalaje INTEGER,
-      tipo_embalaje TEXT,
-      id_serial_lote TEXT,
-      tdhr_caduca TEXT,
-      tdhr TEXT
-    );
-  ''');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_stocks_id ON stocks(id);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_stocks_id2 ON stocks(id2);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_stocks_ubicacion ON stocks(ubicacion);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_stocks_id_serial_lote ON stocks(id_serial_lote);');
-  }
+  List<Stock> _stocks = [];
+  List<Stock> get stocks => _stocks;
 
 // Operaciones CRUD para stocks
-  Future<void> insertStock(Stock stock) async {
+  Future<int> insertStock(Stock stock) async {
     final db = await database;
-    await db
+    return await db
         .insert('stocks', stock.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
@@ -45,40 +38,52 @@ class StocksDataProvider {
     final db = await database;
     final List<Map<String, dynamic>> maps;
     if (filtro == "") {
-       maps = await db.query('stocks');
+      _stocks = [];
+      return _stocks;
+      // maps = await db.query('stocks');
     } else {
       maps = await db.query(
         'stocks',
         where: filtro,
       );
     }
-    return List.generate(maps.length, (i) {
+    _stocks = List.generate(maps.length, (i) {
       return Stock.fromMap(maps[i]);
     });
+    return _stocks;
+  }
+  Future<Stock> getLookup(String key) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps;
+    maps = await db.query(
+      'stocks',
+      where: 'idStock = ${U2StringUtils.u2SQuoteEscaped(key)}',
+    );
+    return Stock.fromMap(maps[0]);
   }
 
-  Future<void> updateStock(Stock stock) async {
+  Future<int> updateStock(Stock stock) async {
     final db = await database;
-    await db.update(
+    return await db.update(
       'stocks',
       stock.toMap(),
-      where: 'id = ? AND id2 = ? AND ubicacion = ? AND id_serial_lote = ?',
-      whereArgs: [stock.id, stock.id2, stock.ubicacion, stock.idSerialLote],
+      where: 'idStock = ?',
+      whereArgs: [stock.idStock],
     );
   }
 
-  Future<void> deleteStock(String id, String id2, String ubicacion, String idSerialLote) async {
+  Future<int> deleteStock(String idStock) async {
     final db = await database;
-    await db.delete(
+    return await db.delete(
       'stocks',
-      where: 'id = ? AND id2 = ? AND ubicacion = ? AND id_serial_lote = ?',
-      whereArgs: [id, id2, ubicacion, idSerialLote],
+      where: 'idStock = ?',
+      whereArgs: [idStock],
     );
   }
 
-  Future<void> deleteAllStocks() async {
+  Future<int> deleteAllStocks() async {
     final db = await database;
-    await db.delete('stocks');
+    return await db.delete('stocks');
   }
 
   Future<void> deleteStockTable() async {
@@ -86,5 +91,64 @@ class StocksDataProvider {
     await db.execute('DROP TABLE IF EXISTS stocks');
   }
 
+  Future<void> fetchAndStoreStocks([Map<String,dynamic>? parametrosGet]) async {
+    Uri? url = httpmy.getMiUrl('/api/stocks',parametrosGet);
+    if (url == null) {
+      throw Exception('Falta configurar la URL');
+    }
+    try {
+      final response = await httpmy.getHttpWithAuth(url!);
+      if (response.statusCode == 200) {
+        List<dynamic> stocksJson = json.decode(response.body);
+        print("total stocks: ${stocksJson.length}");
+        // deleteAllStocks();
+        // var l = await getStocks("true");    print("antes de cargar: ${l.length}");
+        for (var stockJson in stocksJson) {
+          Stock producto = Stock.fromMap(stockJson);
+          try {
+            int cnt;
+            cnt = await updateStock(producto);
+            if (cnt == 0) {
+              int cnt = await insertStock(producto);
+              //print("insert ${producto.id}, $cnt");
+            } else {
+              //print("update ${producto.id}, $cnt");
+            }
+          } catch (e) {
+            throw Exception('Error al guardar Stocks en local ${e.toString()}');
+          }
+        }
+        // var l2 = await getStocks("true"); print("despues de update: ${l2.length}");
+      } else {
+        throw Exception('Error al obtener productos del servidor');
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Método para crear la tabla de stocks
+  Future<void> createStockTable(Database db) async {
+    // final db = await database;
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS stocks (
+      idStock TEXT PRIMARY KEY,
+      id TEXT,
+      id2 TEXT,
+      ubicacion TEXT,
+      cantidad REAL,
+      unidadMedida TEXT,
+      unidadesEmbalaje REAL,
+      tipoEmbalaje TEXT,
+      idSerialLote TEXT,
+      tdhrCaduca TEXT,
+      tdhr TEXT
+    );
+  ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_stocks_id ON stocks(id);');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_stocks_id2 ON stocks(id2);');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_stocks_ubicacion ON stocks(ubicacion);');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_stocks_idSerialLote ON stocks(idSerialLote);');
+  }
 }
 
